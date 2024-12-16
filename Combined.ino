@@ -26,9 +26,9 @@ const long gmtOffset_sec = 0;           // GMT offset
 const int daylightOffset_sec = 0;       // Daylight saving offset
 
 // Thinger.io settings
-#define HOST "backend.thinger.io"
-#define PORT 80  
-#define AUTH_TOKEN "Bearer <Thinger Token Removed>" 
+#define HOST "https://backend.thinger.io/v3/users/NavM/devices/Helmet/callback/data";
+#define PORT 80;
+#define AUTH_TOKEN "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJEZXZpY2VDYWxsYmFja19FeGFtcGxlX0RldmljZSIsInVzciI6Imp0In0.RhNQsRz-Ngu7_KPMJxUikPzEvPck1VeZjwUN4YuyhfQ";
 
 // Geolocation API details
 const char* apiKey = "AIzaSyCntEmrdrHb5rv4k_iPllArjv7CliwJtpM";    
