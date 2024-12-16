@@ -45,7 +45,7 @@ const uint16_t yellow_arrow = matrix.Color(125, 125, 0); // Dim Yellow
 
 
 MPU6050 mpu;
-bool dmpReady = false;
+bool dmpReady = false; 
 uint8_t devStatus;
 uint16_t packetSize;
 uint8_t fifoBuffer[64];
