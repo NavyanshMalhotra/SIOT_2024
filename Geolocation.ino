@@ -6,7 +6,7 @@ const char* ssid = "Nav";
 const char* password = "password"; 
 
 // Replace with your Google API key
-const char* apiKey = "<API KEY REMOVED>";    
+const char* apiKey = "API KEY REMOVED";    
 
 void setup() {
   Serial.begin(115200);
