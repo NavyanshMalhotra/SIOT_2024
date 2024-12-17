@@ -1,4 +1,4 @@
-Component tests: used for testing sensors and actuators 
+Component tests: Used for testing sensors and actuators 
 
 Combined code: Used for integration testing 
 
