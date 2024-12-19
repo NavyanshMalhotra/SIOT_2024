@@ -1,4 +1,4 @@
-Component tests: Used for testing sensors and actuators 
+Component/unit tests: Used for testing sensors and actuators 
 
 EI Model: Installed as an Arduino library (.zip); Data forwarder CLI: $ edge-impulse-data-forwarder
 
