@@ -1,8 +1,6 @@
 Component tests: Used for testing sensors and actuators 
 
-Combined code: Used for integration testing 
-
-EI Model: Installed as an Arduino library
+EI Model: Installed as an Arduino library (.zip)
   Data forwarder CLI: $ edge-impulse-data-forwarder
 
 Video: 
