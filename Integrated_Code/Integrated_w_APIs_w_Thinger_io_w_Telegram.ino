@@ -156,7 +156,7 @@ void setup() {
     ;
   delay(1000);
 
-  // Initialize I2C communication
+  // Initialise I2C communication
   Wire.begin(IMU_SDA, IMU_SCL);
   Wire.setClock(400000);  // Set I2C clock speed to 400kHz
 
@@ -176,17 +176,17 @@ void setup() {
   pinMode(PIR_PIN_LEFT, INPUT);
   pinMode(PIR_PIN_RIGHT, INPUT);
 
-  // Initialize MPU6050
-  Serial.println("Initializing MPU6050...");
-  mpu.initialize();
+  // Initialise MPU6050
+  Serial.println("Initialising MPU6050...");
+  mpu.initialise();
 
   // Verify connection
   Serial.println("Testing device connections...");
   Serial.println(mpu.testConnection() ? "MPU6050 connected" : "MPU6050 connection failed");
 
-  // Initialize DMP
-  Serial.println("Initializing DMP...");
-  devStatus = mpu.dmpInitialize();
+  // Initialise DMP
+  Serial.println("Initialising DMP...");
+  devStatus = mpu.dmpInitialise();
 
   // Calibrated using calibration code
   mpu.setXGyroOffset(-558);
@@ -195,9 +195,9 @@ void setup() {
   mpu.setZAccelOffset(1266);
 
 
-  // Check if DMP initialization was successful
+  // Check if DMP initialisation was successful
   if (devStatus == 0) {
-    Serial.println("DMP initialized successfully");
+    Serial.println("DMP initialised successfully");
     mpu.setDMPEnabled(true);
     mpuIntStatus = mpu.getIntStatus();
     dmpReady = true;
@@ -205,8 +205,8 @@ void setup() {
     // Get expected packet size for DMP
     packetSize = mpu.dmpGetFIFOPacketSize();
   } else {
-    // DMP initialization failed
-    Serial.print("DMP Initialization failed (code ");
+    // DMP initialisation failed
+    Serial.print("DMP Initialisation failed (code ");
     Serial.print(devStatus);
     Serial.println(")");
   }
@@ -220,7 +220,7 @@ void setup() {
   // Get intial startup coords
   coords = Lat_Long();
 
-  // Initialize NTP for current time
+  // Initialise NTP for current time
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
 
   // Process current time
