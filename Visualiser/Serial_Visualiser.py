@@ -9,7 +9,7 @@ import serial
 import time
 import os
 
-# Initialize Dash app with a Bootstrap theme
+# Initialise Dash app with a Bootstrap theme
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.CYBORG])
 
 # Serial Configuration
@@ -18,7 +18,7 @@ BAUD_RATE = 115200
 
 CSV_FILE = "helmet_data.csv"
 
-# Initialize Serial Connection
+# Initialise Serial Connection
 try:
     ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1)
     time.sleep(2) 
@@ -27,7 +27,7 @@ except Exception as e:
     print(f"Serial connection failed: {e}")
     ser = None
 
-# Initialize empty DataFrame for live data
+# Initialise empty DataFrame for live data
 data = pd.DataFrame({"Time": [], "Yaw": [], "Pitch": [], "Roll": [], "Motion": [], "Lat": [], "Lng": [], "PIR_L": [], "PIR_R": []})
 
 # Placeholder values for map and PIRs
@@ -38,7 +38,7 @@ latest_pir_r = 0
 
 if not os.path.isfile(CSV_FILE):
     data.to_csv(CSV_FILE, index=False)
-    print(f"📁 Created CSV file: {CSV_FILE}")
+    print(f"Created CSV file: {CSV_FILE}")
 
 
 # Serial Data Reading Function
