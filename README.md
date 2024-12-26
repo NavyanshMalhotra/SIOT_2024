@@ -1,3 +1,5 @@
+Integrated code with APIs, Thinger.io and Telegram: *Integrated_w_APIs_w_Thinger_io_w_Telegram.ino*
+
 Component/unit tests: Used for testing sensors, actuators and APIs
 
 EI Model: Installed as an Arduino library (.zip); Data forwarder CLI: $ edge-impulse-data-forwarder
