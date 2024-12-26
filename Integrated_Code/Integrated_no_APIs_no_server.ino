@@ -20,7 +20,7 @@ To run code:
 #include <ArduinoJson.h>
 #include "time.h"
 
-// Pin declerations
+// Pin declarations
 #define IMU_SDA 21
 #define IMU_SCL 18
 #define BUZZER_PIN_LEFT 12
@@ -273,7 +273,7 @@ void calculateInference() {
   }
 
   print_inference_result(result);
-}
+} 
 
 void print_inference_result(ei_impulse_result_t result) {
   float max_val = 0.0f;
