@@ -7,11 +7,16 @@ import plotly.graph_objs as go
 import pandas as pd
 import serial
 import time
+import os
 
+# Initialize Dash app with a Bootstrap theme
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.CYBORG])
 
-SERIAL_PORT = '/dev/ttyUSB1'
+# Serial Configuration
+SERIAL_PORT = '/dev/ttyUSB1' 
 BAUD_RATE = 115200
+
+CSV_FILE = "helmet_data.csv"
 
 # Initialize Serial Connection
 try:
@@ -22,25 +27,55 @@ except Exception as e:
     print(f"Serial connection failed: {e}")
     ser = None
 
-data = pd.DataFrame({"Time": [], "Yaw": [], "Pitch": [], "Roll": [], "Lat": [], "Lng": []})
+# Initialize empty DataFrame for live data
+data = pd.DataFrame({"Time": [], "Yaw": [], "Pitch": [], "Roll": [], "Motion": [], "Lat": [], "Lng": [], "PIR_L": [], "PIR_R": []})
 
+# Placeholder values for map and PIRs
+latest_lat = 0.00
+latest_lng = 0.00
+latest_pir_l = 0
+latest_pir_r = 0
+
+if not os.path.isfile(CSV_FILE):
+    data.to_csv(CSV_FILE, index=False)
+    print(f"📁 Created CSV file: {CSV_FILE}")
+
+
+# Serial Data Reading Function
 def read_serial_data():
+    global latest_lat, latest_lng, latest_pir_l, latest_pir_r
+
     if ser and ser.isOpen():
         try:
             raw_data = ser.readline().decode('utf-8').strip()
             print(f"📥 Serial Data: {raw_data}")
             values = raw_data.split(',')
-            if len(values) == 5:  
+            if len(values) == 8:
                 yaw = float(values[0])
                 pitch = float(values[1])
                 roll = float(values[2])
-                lat = float(values[3])
-                lng = float(values[4])
-                current_time = pd.Timestamp.now() - pd.Timedelta(hours=7)
-                return {"Time": current_time, "Yaw": yaw, "Pitch": pitch, "Roll": roll, "Lat": lat, "Lng": lng}
+                motion = str(values[3])
+                lat = float(values[4])
+                lng = float(values[5])
+                pir_l = bool(int(values[6]))
+                pir_r = bool(int(values[7]))
+                current_time = pd.Timestamp.now()
+
+                latest_lat, latest_lng, latest_pir_l, latest_pir_r = lat, lng, pir_l, pir_r
+
+                # Save to CSV
+                new_entry = {
+                    "Time": current_time, "Yaw": yaw, "Pitch": pitch, "Roll": roll,
+                    "Motion": motion, "Lat": lat, "Lng": lng, "PIR_L": pir_l, "PIR_R": pir_r
+                }
+                pd.DataFrame([new_entry]).to_csv(CSV_FILE, mode='a', header=not os.path.isfile(CSV_FILE), index=False)
+                print("Data saved to CSV.")
+
+                return new_entry
         except Exception as e:
             print(f"Error reading serial data: {e}")
     return None
+
 
 # Layout
 app.layout = dbc.Container(
@@ -48,29 +83,32 @@ app.layout = dbc.Container(
     children=[
         html.H1("Helmet Dashboard", style={"textAlign": "center", "marginTop": "20px", "color": "white"}),
 
+        # Row 1: Google Map and Sensors
         dbc.Row(
             [
                 # Google Map
                 dbc.Col(
                     html.Iframe(
-                        src="https://www.google.com/maps?q=" + str(lat) + "," + str(lng) + "&z=14&output=embed",
+                        id="map-iframe",
+                        src=f"https://www.google.com/maps?q={latest_lat},{latest_lng}&z=14&output=embed",
                         style={"width": "100%", "height": "400px", "border": "none", "borderRadius": "8px"},
                     ),
                     width=8,
                 ),
 
-                # Round Sensors
+                # PIR Indicators
                 dbc.Col(
                     [
                         html.Div(
-                            children=[
+                            [
                                 html.H4("Left PIR", style={"textAlign": "center", "color": "white"}),
                                 html.Div(
+                                    id="pir-left",
                                     style={
                                         "width": "100px",
                                         "height": "100px",
                                         "borderRadius": "50%",
-                                        "backgroundColor": "red",
+                                        "border": "3px solid red",
                                         "margin": "auto",
                                     }
                                 ),
@@ -78,14 +116,15 @@ app.layout = dbc.Container(
                             style={"marginBottom": "20px"},
                         ),
                         html.Div(
-                            children=[
+                            [
                                 html.H4("Right PIR", style={"textAlign": "center", "color": "white"}),
                                 html.Div(
+                                    id="pir-right",
                                     style={
                                         "width": "100px",
                                         "height": "100px",
                                         "borderRadius": "50%",
-                                        "backgroundColor": "red",
+                                        "border": "3px solid red",
                                         "margin": "auto",
                                     }
                                 ),
@@ -99,6 +138,7 @@ app.layout = dbc.Container(
             style={"marginBottom": "30px"},
         ),
 
+        # Row 2: Live Graph and 'No turn detected' box
         dbc.Row(
             [
                 dbc.Col(
@@ -118,48 +158,43 @@ app.layout = dbc.Container(
             style={"marginBottom": "30px"},
         ),
 
-        # Interval component for live updates
+        # Interval for updates
         dcc.Interval(
             id="interval-update",
-            interval= 300,  # Update every 300 ms
+            interval=300,
             n_intervals=0,
         ),
     ],
 )
 
+
 # Update the live graph
 @app.callback(
-    Output("live-graph", "figure"),
+    [Output("live-graph", "figure"),
+     Output("pir-left", "style"),
+     Output("pir-right", "style"),
+     Output("map-iframe", "src")],
     [Input("interval-update", "n_intervals")]
 )
-def update_graph(n_intervals):
-    global data
+def update_dashboard(n_intervals):
+    global data, latest_lat, latest_lng, latest_pir_l, latest_pir_r
 
     # Read new data from Serial
     new_row = read_serial_data()
     if new_row:
         new_data = pd.DataFrame([new_row])
-        data = pd.concat([data, new_data]).tail(50)  # Keep the last 50 rows
+        data = pd.concat([data, new_data]).tail(50)
 
-    # Create updated figure
-    figure = {
-        "data": [
-            go.Scatter(x=data["Time"], y=data["Yaw"], mode="lines", name="Yaw"),
-            go.Scatter(x=data["Time"], y=data["Pitch"], mode="lines", name="Pitch"),
-            go.Scatter(x=data["Time"], y=data["Roll"], mode="lines", name="Roll"),
-        ],
-        "layout": go.Layout(
-            title="Yaw, Pitch, and Roll Live Data",
-            xaxis={"title": "Time"},
-            yaxis={"title": "Degrees"},
-            paper_bgcolor="#222222",
-            plot_bgcolor="#222222",
-            font={"color": "white"},
-        ),
-    }
-    return figure
+    pir_left_style = {"backgroundColor": "red" if latest_pir_l else "transparent"}
+    pir_right_style = {"backgroundColor": "red" if latest_pir_r else "transparent"}
 
-# Run the app
+    map_src = f"https://www.google.com/maps?q={latest_lat},{latest_lng}&z=14&output=embed"
+
+    figure = {"data": [go.Scatter(x=data["Time"], y=data["Yaw"], mode="lines")]}
+
+    return figure, pir_left_style, pir_right_style, map_src
+
+
 if __name__ == "__main__":
     try:
         app.run_server(debug=True)
