@@ -1,6 +1,6 @@
 Integrated code with APIs, Thinger.io and Telegram: *Integrated_w_APIs_w_Thinger_io_w_Telegram.ino*
 
-Component/unit tests: Used for testing sensors, actuators and APIs. Python Serial Comms Visualiser dashboard on http://127.0.0.1:8050/
+Component/unit tests: Used for testing sensors, actuators and APIs. Python Serial Comms Visualiser with CSV saving dashboard on http://127.0.0.1:8050/
 
 EI Model: Installed as an Arduino library (.zip); Data forwarder CLI: $ edge-impulse-data-forwarder
 
